@@ -1,3 +1,6 @@
+const wrhsAssets = require('./wrhs-assets.js');
+const wrhsBasePackageRequest = require('./wrhs-base-package-request.js');
+
 module.exports =
   /**
    * Retrieve Warehouse object from cache or new request
@@ -10,5 +13,17 @@ module.exports =
    * @returns {object} warehouse object
    */
   async function getWarehouse(name, options = {}) {
-    // implementation
+    const { defaultWrhsPackageRequest = true } = gasket.config.hcs;
+
+    const wrhsRequests = [];
+    // append base package request to lifecycle results
+    if (defaultWrhsPackageRequest) {
+      wrhsRequests.push(wrhsBasePackageRequest(gasket, locale));
+    }
+    let wrhsAssetsResult = {};
+    if (wrhsRequests.length) {
+      wrhsAssetsResult = await wrhsAssets(gasket, wrhsRequests);
+    }
+
+    return wrhsAssetsResult;
   };

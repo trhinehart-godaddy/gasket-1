@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Gasket Warehouse Plugin",
   "main": "lib",
+  "bin": {
+    "wrhs-publish": "./bin/wrhs-publish"
+  },
   "scripts": {
     "lint": "eslint . --ignore-pattern \"generator/jest/*\" --ignore-pattern \"generator/mocha/*\"",
     "lint:fix": "npm run lint -- --fix",
@@ -23,6 +26,10 @@
     "url": "https://github.com/godaddy/gasket/issues"
   },
   "homepage": "https://github.com/godaddy/gasket/tree/main/packages/gasket-plugin-warehouse",
+  "dependencies": {
+    "out-of-band-cache": "^1.2.3",
+    "wrhs": "^1.1.1"
+  },
   "devDependencies": {
     "eslint": "^8.16.0",
     "eslint-config-godaddy-react": "^8.0.0",

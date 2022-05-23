@@ -1,0 +1,47 @@
+#!/bin/sh
+
+IFS=" "
+DEFAULT_LOCALE="en-US"
+
+if [ -z $1 ]; then
+  echo "[ERROR] Please specify deployment environment"
+  exit 0
+fi
+
+if [ -z $WRHS_NEXT_CONFIG ]; then
+  echo "[WARNING] Warehouse config is not explicitly set. Using ~/.wrhs"
+fi
+
+echo "[INFO] Building assets"
+NODE_ENV=$1 npm run build --env=$1
+
+echo "[INFO] Extracting metadata from package.json"
+PACKAGE_NAME=$(grep -m1 name package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+PACKAGE_VERSION=$(grep -m1 version package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+
+echo "[INFO] Copying non-server files to staging folder"
+rsync -r --exclude="*.server.js*" build/ build-wrhs/
+
+echo "[INFO] Uploading assets to Warehouse"
+wrhs upload ./build-wrhs $PACKAGE_NAME -v $PACKAGE_VERSION -e $1 -a $DEFAULT_LOCALE
+
+echo "[INFO] Delete staging folder"
+rm -rf build-wrhs
+
+sleep 2
+
+wrhs object:get $PACKAGE_NAME -v $PACKAGE_VERSION -e $1 -a $DEFAULT_LOCALE
+
+echo "[INFO] Assets uploaded to Warehouse"
+
+releaseCx="y"
+
+if [ "$CI" != "1" ]; then
+  read -p "Do you want to release $PACKAGE_NAME@$PACKAGE_VERSION in $1? (y/n) " releaseCx
+fi
+
+if [ $releaseCx == "y" ]; then
+  echo "[INFO] Releasing $PACKAGE_NAME@$PACKAGE_VERSION in $1"
+  wrhs object:set-head $PACKAGE_NAME -v $PACKAGE_VERSION -e $1
+  echo "[INFO] Assets released in $1"
+fi
