@@ -1,0 +1,56 @@
+{
+  "name": "@gasket/plugin-warehouse",
+  "version": "1.0.0",
+  "description": "Gasket Warehouse Plugin",
+  "main": "lib",
+  "scripts": {
+    "lint": "eslint . --ignore-pattern \"generator/jest/*\" --ignore-pattern \"generator/mocha/*\"",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/godaddy/gasket.git"
+  },
+  "keywords": [
+    "gasket",
+    "plugin",
+    "warehouse"
+  ],
+  "author": "GoDaddy Operating Company, LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/godaddy/gasket/issues"
+  },
+  "homepage": "https://github.com/godaddy/gasket/tree/main/packages/gasket-plugin-warehouse",
+  "devDependencies": {
+    "eslint": "^8.16.0",
+    "eslint-config-godaddy-react": "^8.0.0",
+    "eslint-plugin-unicorn": "^42.0.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "godaddy-react"
+    ],
+    "plugins": [
+      "unicorn"
+    ],
+    "rules": {
+      "unicorn/filename-case": "error"
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/*.test.js",
+          "**/*.test.jsx"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
+  },
+  "eslintIgnore": [
+    "coverage"
+  ]
+}
