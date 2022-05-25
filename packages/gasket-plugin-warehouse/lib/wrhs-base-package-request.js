@@ -17,6 +17,7 @@ const { NODE_ENV } = process.env;
  * @returns {WrhsObjectRequest} Base package request
  */
 module.exports = function wrhsBasePackageRequest(gasket, locale = 'en-US') {
+  console.log('NODE ENVV ', NODE_ENV);
   if ((!NODE_ENV && gasket.config.hcs.devMode) || gasket.config.env === 'local') {
     return;
   }

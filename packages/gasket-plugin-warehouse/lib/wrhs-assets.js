@@ -58,75 +58,75 @@ function getWrhsDataGetter({ client, name, acceptedVariants, env, version }) {
   };
 }
 
-module.exports =
-  /**
-   * Fetch assets from Warehouse based on the package version.
-   * @param {Gasket} gasket Gasket instance
-   * @param {wrhsPackageRequests[]} wrhsReqs Warehouse package requests
-   * @returns {Promise<Object.<string, WrhsData>>} Warehouse response to the object request
-   */
-  async function wrhsAssets(gasket, wrhsReqs = []) {
-    if (gasket.config.hcs.devMode || gasket.config.env === 'local') {
-      return {};
-    }
+/**
+ * Fetch assets from Warehouse based on the package version.
+ * @param {Gasket} gasket Gasket instance
+ * @param {wrhsPackageRequests[]} wrhsReqs Warehouse package requests
+ * @returns {Promise<Object.<string, WrhsData>>} Warehouse response to the object request
+ */
+async function wrhsAssets(gasket, wrhsReqs = []) {
+  if (gasket.env === 'local') {
+    return {};
+  }
 
-    cache =
-      cache ||
-      new Cache({
-        maxAge: DEFAULT_TTL,
-        fsCachePath:
-          gasket.config.wrhs?.fsCachePath || path.join(gasket.config.root, '.wrhs-cache')
-      });
+  cache =
+    cache ||
+    new Cache({
+      maxAge: DEFAULT_TTL,
+      fsCachePath: gasket.wrhs?.fsCachePath || path.join(gasket.root, '.wrhs-cache')
+    });
 
-    const { baseUrl, username, password } = gasket.config?.wrhs || {};
-    const client =
-      gasket.wrhs ||
-      new Request({
-        baseUrl: baseUrl || WRHS_ENDPOINT,
-        username: username || WRHS_USERNAME,
-        password: password || WRHS_PASSWORD
-      });
+  const { baseUrl, username, password } = gasket?.wrhs || {};
+  const client =
+    gasket.wrhs ||
+    new Request({
+      baseUrl: baseUrl || WRHS_ENDPOINT,
+      username: username || WRHS_USERNAME,
+      password: password || WRHS_PASSWORD
+    });
 
-    /** @type WrhsObjectVariant[] */
-    const variants = await Promise.all(
-      wrhsReqs.map(async (wrhsReq) => {
-        let { ttl = DEFAULT_TTL } = wrhsReq;
-        const {
-          name,
-          env = gasket.config.env || 'development',
-          version,
-          acceptedVariants = DEFAULT_VARIANTS
-        } = wrhsReq;
-        const variants = acceptedVariants.join(',');
-        const key = `${name}_${env}_${version}_${variants}`;
+  /** @type WrhsObjectVariant[] */
+  const variants = await Promise.all(
+    wrhsReqs.map(async (wrhsReq) => {
+      let { ttl = DEFAULT_TTL } = wrhsReq;
+      const {
+        name,
+        env = gasket.env || 'development',
+        version,
+        acceptedVariants = DEFAULT_VARIANTS
+      } = wrhsReq;
+      const variants = acceptedVariants.join(',');
+      const key = `${name}_${env}_${version}_${variants}`;
 
-        if (ttl === -1) {
-          ttl = 365 * 24 * 60 * 60 * 1000; // Cache for 365 days (one year)
-        }
+      if (ttl === -1) {
+        ttl = 365 * 24 * 60 * 60 * 1000; // Cache for 365 days (one year)
+      }
 
-        /** @type WrhsObjectVariant | WrhsObjectVariant[] */
-        const { value: variant, fromCache = false } = await cache.get(
-          key,
-          { maxAge: ttl, skipCache: ttl === 0 },
-          getWrhsDataGetter({ client, name, acceptedVariants: variants, version, env })
-        );
+      /** @type WrhsObjectVariant | WrhsObjectVariant[] */
+      const { value: variant, fromCache = false } = await cache.get(
+        key,
+        { maxAge: ttl, skipCache: ttl === 0 },
+        getWrhsDataGetter({ client, name, acceptedVariants: variants, version, env })
+      );
 
-        if (fromCache) {
-          gasket.logger.info(`wrhs request for ${key} resolved from cache`);
-        }
+      if (fromCache) {
+        console.log(`wrhs request for ${key} resolved from cache`);
+      }
 
-        // Be extra safe in case API changes in the future
-        if (Array.isArray(variant)) {
-          const [v] = variant;
-          return v;
-        }
+      // Be extra safe in case API changes in the future
+      if (Array.isArray(variant)) {
+        const [v] = variant;
+        return v;
+      }
 
-        return variant;
-      })
-    );
+      return variant;
+    })
+  );
 
-    return variants.reduce((acc, variant) => {
-      acc[variant.name] = variant.data;
-      return acc;
-    }, {});
-  };
+  return variants.reduce((acc, variant) => {
+    acc[variant.name] = variant.data;
+    return acc;
+  }, {});
+}
+
+module.exports = wrhsAssets;

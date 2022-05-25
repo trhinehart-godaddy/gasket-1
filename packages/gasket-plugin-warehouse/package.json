@@ -6,10 +6,17 @@
   "bin": {
     "wrhs-publish": "./bin/wrhs-publish"
   },
+  "files": [
+    "!lib/**/*.test.js",
+    "lib",
+    "bin"
+  ],
   "scripts": {
     "lint": "eslint . --ignore-pattern \"generator/jest/*\" --ignore-pattern \"generator/mocha/*\"",
     "lint:fix": "npm run lint -- --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -33,7 +40,8 @@
   "devDependencies": {
     "eslint": "^8.16.0",
     "eslint-config-godaddy-react": "^8.0.0",
-    "eslint-plugin-unicorn": "^42.0.0"
+    "eslint-plugin-unicorn": "^42.0.0",
+    "jest": "^28.1.0"
   },
   "eslintConfig": {
     "extends": [
