@@ -1,5 +1,6 @@
 import path from 'path';
 import os from 'os';
+import { pathToFileURL } from 'url';
 import { withSpinner } from '../with-spinner.js';
 import { PackageManager } from '@gasket/utils';
 import { mkdtemp } from 'fs/promises';
@@ -35,7 +36,7 @@ async function loadPresets({ context }) {
       // Import the preset via the package file attrs, name and main
       // We can't specify the cwd for the import, so we need to use the full path
       // expects type:module & "main": "lib/fullpath.js"
-      const mod = await import(`${modPath}/${name}/${pkgFile.main}`);
+      const mod = await import(pathToFileURL(`${modPath}/${name}/${pkgFile.main}`));
       return mod.default?.default || mod.default || mod;
     } catch (err) {
       throw new Error(`Failed to install preset ${name}${version}: ${err.message}`);
@@ -47,7 +48,7 @@ async function loadPresets({ context }) {
     try {
       await pkgManager.exec(pkgVerb, [localPresetPath]);
       const pkgFile = require(path.join(localPresetPath, 'package.json'));
-      const mod = await import(`${modPath}/${pkgFile.name}/${pkgFile.main}`);
+      const mod = await import(pathToFileURL(`${modPath}/${pkgFile.name}/${pkgFile.main}`));
       return mod.default?.default || mod.default || mod;
     } catch (err) {
       throw new Error(`Failed to install local preset ${localPresetPath}`);
